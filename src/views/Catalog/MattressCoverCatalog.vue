@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Кровати</p>
+    <p>Чехлы</p>
   </div>
 </template>
 

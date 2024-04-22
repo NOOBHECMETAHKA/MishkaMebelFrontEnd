@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>Шкафы и комоды</p>
+
   </div>
 </template>
 

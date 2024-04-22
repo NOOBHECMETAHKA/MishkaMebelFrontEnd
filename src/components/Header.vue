@@ -7,22 +7,22 @@
       </template>
       <ul class="nav-mobile-menu">
         <li class="nav-mobile-menu-item">
-          <a href="" class="nav-mobile-link"><span>#</span> Главная</a>
+          <router-link to="/" class="nav-mobile-link"><span>#</span> Главная</router-link>
         </li>
         <li class="nav-mobile-menu-item">
-          <a href="" class="nav-mobile-link"><span>#</span> Матрасы</a>
+          <router-link to="/catalog/mattress" class="nav-mobile-link"><span>#</span> Матрасы</router-link>
         </li>
         <li class="nav-mobile-menu-item">
-          <a href="" class="nav-mobile-link"><span>#</span> Чехлы</a>
+          <router-link to="/catalog/mattress-cover" class="nav-mobile-link"><span>#</span> Чехлы</router-link>
         </li>
         <li class="nav-mobile-menu-item">
-          <a href="" class="nav-mobile-link"><span>#</span> Кровати</a>
+          <router-link to="/catalog/bed" class="nav-mobile-link"><span>#</span> Кровати</router-link>
         </li>
         <li class="nav-mobile-menu-item">
-          <a href="" class="nav-mobile-link"><span>#</span> Хранилища вещей</a>
+          <router-link to="/catalog/table" class="nav-mobile-link"><span>#</span> Столы</router-link>
         </li>
         <li class="nav-mobile-menu-item">
-          <a href="" class="nav-mobile-link"><span>#</span> Контакты</a>
+          <router-link to="/catalog/furniture-storage" class="nav-mobile-link"><span>#</span> Хранилища вещей</router-link>
         </li>
       </ul>
       <div class="header__tool_kit-user mobile-widget">
@@ -68,22 +68,22 @@
       <div class="header__nav header__nav--open">
         <ul class="header_nav-menu">
           <li class="nav-menu__item">
-            <a href="" class="nav-menu__link">Матрасы</a>
+            <router-link to="/" class="nav-menu__link">Главная</router-link>
           </li>
           <li class="nav-menu__item">
-            <a href="" class="nav-menu__link">Чехлы</a>
+            <router-link to="/catalog/mattress" class="nav-menu__link">Матрасы</router-link>
           </li>
           <li class="nav-menu__item">
-            <a href="" class="nav-menu__link">Кровати</a>
+            <router-link to="/catalog/mattress-cover" class="nav-menu__link">Чехлы</router-link>
           </li>
           <li class="nav-menu__item">
-            <a href="" class="nav-menu__link">Столы</a>
+            <router-link to="/catalog/bed" class="nav-menu__link">Кровати</router-link>
           </li>
           <li class="nav-menu__item">
-            <a href="" class="nav-menu__link">Шкаф и комоды</a>
+            <router-link to="/catalog/table" class="nav-menu__link">Столы</router-link>
           </li>
           <li class="nav-menu__item">
-            <a href="" class="nav-menu__link">Контакты</a>
+            <router-link to="/catalog/furniture-storage" class="nav-menu__link">Шкаф и комоды</router-link>
           </li>
         </ul>
       </div>
