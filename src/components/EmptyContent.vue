@@ -1,11 +1,24 @@
 <template>
-  <div class="empty-content-massage">
+  <div v-if="this.isFinished" class="empty-content-massage">
     <i class="pi pi-spin pi-compass" style="color: var(--primary-color)"></i>
+    <h4>Ищем инфомарцию для вас...</h4>
+    <p>Работаем для вас!</p>
+  </div>
+  <div v-else class="empty-content-massage">
+    <i class="pi pi-box" style="color: var(--primary-color)"></i>
     <h4>Мы работаем над этим...</h4>
     <p>Ничего не найдено!</p>
     <p>Простите нас!</p>
   </div>
 </template>
+
+<script>
+export default {
+  props: {
+    isFinished: Boolean,
+  }
+}
+</script>
 
 <style lang="css" scoped>
 .empty-content-massage{

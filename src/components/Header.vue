@@ -30,7 +30,7 @@
           <icon-user></icon-user>
           Личный кабинет
         </div>
-        <prime-vue-button icon="pi pi-shopping-cart" aria-label="Submit" badge="99"/>
+        <prime-vue-button icon="pi pi-shopping-cart" aria-label="Submit"/>
       </div>
       <div class="header__tool_kit-user mobile-widget">
         <div class="header__user_info">
@@ -52,16 +52,24 @@
             <icon-user></icon-user>
             Личный кабинет
           </div>
-          <prime-vue-button icon="pi pi-shopping-cart" aria-label="Submit" badge="99"/>
+          <prime-vue-button
+              v-if="store.personalBasket.cartItemsCount"
+              :badge="store.personalBasket.cartItemsCount.toString()"
+              icon="pi pi-shopping-cart"/>
+          <prime-vue-button
+              v-else
+              icon="pi pi-shopping-cart"/>
+          <prime-vue-button v-if="store.personalBasket.cartItemsCount" icon="pi pi-trash"
+              @click.prevent="store.personalBasket.clearCart()"/>
         </div>
 <!--        End Auth functions-->
 <!--        Admin function-->
-        <div class="header__tool_kit-user header__nav--open">
-          <div class="header__user_info">
-            <i class="pi pi-spin pi-cog" style="font-size: 2rem; color: var(--primary-color)"></i>
-            Панель управления
-          </div>
-        </div>
+<!--        <div class="header__tool_kit-user header__nav&#45;&#45;open">-->
+<!--          <div class="header__user_info">-->
+<!--            <i class="pi pi-spin pi-cog" style="font-size: 2rem; color: var(&#45;&#45;primary-color)"></i>-->
+<!--            Панель управления-->
+<!--          </div>-->
+<!--        </div>-->
 <!--        End admin functions-->
       </div>
 <!--      Computer menu-->
@@ -91,12 +99,7 @@
     </header>
   </div>
 </template>
-
 <script>
-import Dialog from 'primevue/dialog';
-
-
-
 import IconUser from "@/components/Icons/IconUser.vue";
 import IconSearch from "@/components/Icons/IconSearch.vue";
 import IconBasket from "@/components/Icons/IconBasket.vue";
@@ -104,7 +107,16 @@ import IconMenuHeader from "@/components/Icons/IconMenuHeader.vue";
 //Components
 import Button from 'primevue/button';
 import Listbox from "primevue/listbox";
+import Dialog from 'primevue/dialog';
+//Functions
+import { store } from "@/store/index.js";
+
 export default {
+  computed: {
+    store() {
+      return store;
+    }
+  },
   components: {
     IconUser,
     IconSearch,
@@ -112,7 +124,7 @@ export default {
     IconMenuHeader,
     "PrimeVueButton": Button,
     Dialog,
-    Listbox
+    Listbox,
   },
   data(){
     return {
@@ -125,12 +137,9 @@ export default {
         { name: 'Кровати', code: 'beds' },
         { name: 'Хранилища вещей', code: 'storage' },
         { name: 'Контакты', code: 'contacts' }
-      ]
+      ],
     };
   },
 }
 </script>
 
-<style>
-
-</style>

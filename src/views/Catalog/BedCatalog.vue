@@ -1,4 +1,5 @@
 <template>
+  <Toast />
   <div>
 <!--    Product info-->
     <Dialog v-model:visible="detailProductIsActive" @close="" modal header="Меню навигации" :style="{ width: '50rem' }">
@@ -35,7 +36,7 @@
           </tr>
           <tr>
             <td>
-              <vue-button label="Добавить в корзину" icon="pi pi-cart-plus"/>
+              <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" @click="addProductInBasket(selectedProduct.id, selectedProduct.name)"/>
             </td>
           </tr>
         </table>
@@ -83,7 +84,7 @@
           </div>
         </template>
         <template #empty>
-          <empty-content></empty-content>
+          <empty-content :is-finished="loading"></empty-content>
         </template>
         <template #list="slotProps">
           <div class="catalog_list__list">
@@ -105,7 +106,7 @@
                 </td>
                 <td>
                   <div class="catalog_grid__card__panel">
-                    <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" />
+                    <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" @click="addProductInBasket(item.id, item.name)"/>
                     <vue-button icon="pi pi-list" @click="chooseProductForInformation(item, true)"/>
                   </div>
                 </td>
@@ -125,7 +126,7 @@
                 <p></p>
                 <p><Tag severity="secondary" :value="item.guarantee"></Tag></p>
                 <div class="catalog_grid__card__panel">
-                  <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" />
+                  <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" @click="addProductInBasket(item.id, item.name)"/>
                   <vue-button icon="pi pi-list" @click="chooseProductForInformation(item, true)"/>
                 </div>
               </div>
@@ -154,7 +155,15 @@ import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions';
 import Tag from "primevue/tag";
 import EmptyContent from "@/components/EmptyContent.vue";
 import Galleria from 'primevue/galleria';
+import Cart from "@/store/Cart.js";
+
+import Toast from 'primevue/toast';
+import { useToast } from 'primevue/usetoast';
+//Functions
+import { store } from "@/store/index.js";
+
 export default {
+
   components: {
     IconUser,
     Checkbox,
@@ -171,7 +180,9 @@ export default {
     DataViewLayoutOptions,
     Tag,
     EmptyContent,
-    Galleria
+    Galleria,
+    Toast,
+    useToast
   },
   data(){
     return {
@@ -198,7 +209,8 @@ export default {
           value: 'right'
         }
       ],
-
+      //Basket
+      basket: new Cart(),
 
       //Bases loading
       collectionInfo: null,
@@ -231,17 +243,20 @@ export default {
   mounted() {
     this.getProducts();
     window.addEventListener('resize', this.handleResize);
+    useToast();
   },
   methods: {
     /**
      * Метод получения данных с сервера
+     * { params: { 'category': 'beds'}}
      */
     getProducts(){
       this.axios.get('/products', ).then(resp => {
         this.collectionInfo = resp.data.data;
         this.count = resp.data.data.length;
         this.loading = false;
-        console.log(resp);
+      }).catch(bug => {
+        this.loading = false;
       });
     },
     /**
@@ -265,6 +280,21 @@ export default {
     chooseProductForInformation(selectedProduct, isActive){
       this.selectedProduct = selectedProduct;
       this.detailProductIsActive = isActive;
+    },
+    /**
+     * Метод добавления товара в корзину
+     */
+    addProductInBasket(IDProduct, helpFullName){
+      if(store.personalBasket.cartItemsCount < 10) {
+        store.personalBasket.addToCart(IDProduct);
+        if(helpFullName){
+          this.$toast.add({ severity: 'success', summary: '👍 Успешно', detail: `Товар "${helpFullName}" успешно добавлен в корзину!`, life: 3000 });
+        } else {
+          this.$toast.add({ severity: 'success', summary: '👍 Успешно', detail: `Товар успешно добавлен в корзину!`, life: 3000 });
+        }
+      } else {
+        this.$toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Больше товаров нельзя добавить в корзину, так как это уже крупный заказ!`, life: 3000 });
+      }
     }
   }
 }
