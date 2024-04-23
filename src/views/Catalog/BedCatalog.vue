@@ -60,15 +60,7 @@
           </ul>
         </div>
         <div>
-          <p class="form-filter__title">Минимальная цена</p>
-          <InputNumber v-model="minPrice" inputId="Минимальная цена" suffix=" рублей" />
-        </div>
-        <div>
-          <p class="form-filter__title">Максимальная цена</p>
-          <InputNumber v-model="maxPrice" inputId="Максимальная цена" suffix=" рублей" />
-        </div>
-        <div>
-          <prime-vue-button icon="pi pi-search" label="Найти"></prime-vue-button>
+          <prime-vue-button @click="setUpFilter()" icon="pi pi-search" label="Найти"></prime-vue-button>
         </div>
       </div>
     </Dialog>
@@ -80,6 +72,7 @@
         <template #header>
           <div class="catalog_header_panel">
             <vue-button icon="pi pi-filter" @click.prevent="filterIsActive = true"></vue-button>
+            <vue-button v-if="this.selectedGuarantees.length > 0" icon="pi pi-filter-slash" @click.prevent="clearFilters()"></vue-button>
             <DataViewLayoutOptions v-model="layout" v-if="windowWidth > 1100"/>
           </div>
         </template>
@@ -163,7 +156,6 @@ import { useToast } from 'primevue/usetoast';
 import { store } from "@/store/index.js";
 
 export default {
-
   components: {
     IconUser,
     Checkbox,
@@ -181,8 +173,7 @@ export default {
     Tag,
     EmptyContent,
     Galleria,
-    Toast,
-    useToast
+    Toast
   },
   data(){
     return {
@@ -224,9 +215,6 @@ export default {
       selectedProduct: null,
       
       //Filter params
-      nameProduct: '',
-      minPrice: null,
-      maxPrice: null,
       selectedGuarantees: [],
       
       //Filter content
@@ -251,7 +239,7 @@ export default {
      * { params: { 'category': 'beds'}}
      */
     getProducts(){
-      this.axios.get('/products', ).then(resp => {
+      this.axios.get('/products', { params: { 'category': 'beds'}}).then(resp => {
         this.collectionInfo = resp.data.data;
         this.count = resp.data.data.length;
         this.loading = false;
@@ -288,13 +276,38 @@ export default {
       if(store.personalBasket.cartItemsCount < 10) {
         store.personalBasket.addToCart(IDProduct);
         if(helpFullName){
-          this.$toast.add({ severity: 'success', summary: '👍 Успешно', detail: `Товар "${helpFullName}" успешно добавлен в корзину!`, life: 3000 });
+          this.$toast.add({ severity: 'success', summary: 'Успешно', detail: `Товар "${helpFullName}" успешно добавлен в корзину!`, life: 3000 });
         } else {
-          this.$toast.add({ severity: 'success', summary: '👍 Успешно', detail: `Товар успешно добавлен в корзину!`, life: 3000 });
+          this.$toast.add({ severity: 'success', summary: 'Успешно', detail: `Товар успешно добавлен в корзину!`, life: 3000 });
         }
       } else {
         this.$toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Больше товаров нельзя добавить в корзину, так как это уже крупный заказ!`, life: 3000 });
       }
+    },
+    /**
+     * Метод отчистки фильтров
+     */
+    clearFilters(){
+      this.getProducts();
+      this.selectedGuarantees = [];
+    },
+    /**
+     * Метод добавления товара в корзину
+     */
+    filterObjects(objects, filters) {
+      return objects.filter(obj => {
+        let guarantee = obj.guarantee;
+        return (filters.gua === null || filters.gua.includes(guarantee));
+      });
+    },
+    /**
+     * Метод прохождения валидации
+     */
+    setUpFilter(){
+      if(this.selectedGuarantees.length){
+        let filters = { "gua": this.selectedGuarantees };
+        this.collectionInfo = this.filterObjects(this.collectionInfo, filters);
+      } else this.$toast.add({ severity: 'warn', summary: 'Ошибка', detail: `Требуется установить хотя бы какой-нибудь фильтр!`, life: 3000 });
     }
   }
 }
