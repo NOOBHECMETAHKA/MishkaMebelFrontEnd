@@ -533,6 +533,11 @@ footer .container{
     border-spacing: 0 30px;
 }
 
+.table-detail-product{
+    width: 100%;
+    border-spacing: 0 10px;
+}
+
 @media (max-width: 1200px) {
     .__recommendations_content{
         flex-wrap: wrap;

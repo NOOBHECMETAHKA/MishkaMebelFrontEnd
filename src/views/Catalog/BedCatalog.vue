@@ -1,6 +1,49 @@
 <template>
   <div>
-    <Dialog v-model:visible="visible" modal header="Меню навигации" :style="{ width: '25rem' }">
+<!--    Product info-->
+    <Dialog v-model:visible="detailProductIsActive" @close="" modal header="Меню навигации" :style="{ width: '50rem' }">
+      <template #header>
+        <img class="min-logo" src="@/assets/img/Logo.png" alt="MishkaMebelLogo">
+        <span class="__modal_card_title">Мишка мебель</span>
+      </template>
+      <div v-if="selectedProduct">
+        <div v-if="selectedProduct.photos">
+          <Galleria :value="selectedProduct.photos" :numVisible="5" containerStyle="max-width: 640px" :showThumbnails="false"
+                    :showIndicators="true" :changeItemOnIndicatorHover="true" :showIndicatorsOnItem="inside" :indicatorsPosition="position">
+            <template #item="slotProps">
+              <img class="catalog_grid__card__img" :src="slotProps.item.link" alt="Попытка" style="" />
+            </template>
+          </Galleria>
+        </div>
+        <table class="table-detail-product">
+          <tr>
+            <td class="__text_main-color">Наименование:</td>
+            <td class="__text_second-color">{{ selectedProduct.name }}</td>
+          </tr>
+          <tr>
+            <td class="__text_main-color">Описание:</td>
+            <td class="__text_second-color">{{ selectedProduct.description }}</td>
+          </tr>
+          <tr>
+            <td class="__text_main-color">Цена:</td>
+            <td v-if="selectedProduct.discounts" class="__text_second-color"><del>{{ getPrice(selectedProduct.price, selectedProduct.discounts.percent) }}</del> {{ getPrice(selectedProduct.price, 0) }} рублей</td>
+            <td v-else class="__text_second-color">{{ getPrice(selectedProduct.price, 0) }} рублей </td>
+          </tr>
+          <tr>
+            <td class="__text_main-color">Гарантия:</td>
+            <td><Tag severity="secondary" :value="selectedProduct.guarantee"></Tag></td>
+          </tr>
+          <tr>
+            <td>
+              <vue-button label="Добавить в корзину" icon="pi pi-cart-plus"/>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </Dialog>
+<!--    End Product info-->
+<!--    Filter-->
+    <Dialog v-model:visible="filterIsActive" modal header="Меню навигации" :style="{ width: '25rem' }">
       <template #header>
         <img class="min-logo" src="@/assets/img/Logo.png" alt="MishkaMebelLogo">
         <span class="__modal_card_title">Мишка мебель</span>
@@ -28,18 +71,19 @@
         </div>
       </div>
     </Dialog>
+<!--    End Filter-->
 <!--    End dialog-->
     <h1 class="catalog-title">Кровати</h1>
     <div class="catalog-panel">
       <DataView :value="collectionInfo" paginator :rows="10" :layout="layout">
         <template #header>
           <div class="catalog_header_panel">
-            <vue-button icon="pi pi-filter" @click.prevent="visible = true"></vue-button>
+            <vue-button icon="pi pi-filter" @click.prevent="filterIsActive = true"></vue-button>
             <DataViewLayoutOptions v-model="layout" v-if="windowWidth > 1100"/>
           </div>
         </template>
         <template #empty>
-          Ничего нету
+          <empty-content></empty-content>
         </template>
         <template #list="slotProps">
           <div class="catalog_list__list">
@@ -62,7 +106,7 @@
                 <td>
                   <div class="catalog_grid__card__panel">
                     <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" />
-                    <vue-button icon="pi pi-list"/>
+                    <vue-button icon="pi pi-list" @click="chooseProductForInformation(item, true)"/>
                   </div>
                 </td>
               </tr>
@@ -82,7 +126,7 @@
                 <p><Tag severity="secondary" :value="item.guarantee"></Tag></p>
                 <div class="catalog_grid__card__panel">
                   <vue-button label="Добавить в корзину" icon="pi pi-cart-plus" />
-                  <vue-button icon="pi pi-list"/>
+                  <vue-button icon="pi pi-list" @click="chooseProductForInformation(item, true)"/>
                 </div>
               </div>
             </div>
@@ -108,6 +152,8 @@ import Dialog from "primevue/dialog";
 import DataView from "primevue/dataview";
 import DataViewLayoutOptions from 'primevue/dataviewlayoutoptions';
 import Tag from "primevue/tag";
+import EmptyContent from "@/components/EmptyContent.vue";
+import Galleria from 'primevue/galleria';
 export default {
   components: {
     IconUser,
@@ -123,27 +169,55 @@ export default {
     Dialog,
     DataView,
     DataViewLayoutOptions,
-    Tag
+    Tag,
+    EmptyContent,
+    Galleria
   },
   data(){
     return {
+      //View catalog params
       layout: 'grid',
       windowWidth: window.innerWidth,
+      inside: false,
+      position: 'bottom',
+      positionOptions: [
+        {
+          label: 'Bottom',
+          value: 'bottom'
+        },
+        {
+          label: 'Top',
+          value: 'top'
+        },
+        {
+          label: 'Left',
+          value: 'left'
+        },
+        {
+          label: 'Right',
+          value: 'right'
+        }
+      ],
 
+
+      //Bases loading
       collectionInfo: null,
       count: 0,
-      filters: {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-      },
       loading: true,
-      selectedElement: null,
-      visible: false,
-
-      products: null,
+      
+      //Dialog visible
+      filterIsActive: false,
+      detailProductIsActive: false,
+      
+      selectedProduct: null,
+      
+      //Filter params
       nameProduct: '',
       minPrice: null,
       maxPrice: null,
       selectedGuarantees: [],
+      
+      //Filter content
       guarantees: [
         'Нету гарантии',
         '3 месяца',
@@ -159,25 +233,39 @@ export default {
     window.addEventListener('resize', this.handleResize);
   },
   methods: {
+    /**
+     * Метод получения данных с сервера
+     */
     getProducts(){
-      this.axios.get('/products', { params: {'category': 'beds'} }).then(resp => {
+      this.axios.get('/products', ).then(resp => {
         this.collectionInfo = resp.data.data;
         this.count = resp.data.data.length;
         this.loading = false;
         console.log(resp);
       });
     },
+    /**
+     * Метод подготовки ценообразования
+     */
     getPrice(value, percent){
       return Math.round(value - (value / 100 * percent)).toLocaleString();
     },
+    /**
+     * Метод получения максимального размера окна
+     */
     handleResize() {
       this.windowWidth = window.innerWidth;
       if(this.windowWidth < 1100){
         this.layout = 'grid';
       }
+    },
+    /**
+     * Метод получения подробной информации о товаре
+     */
+    chooseProductForInformation(selectedProduct, isActive){
+      this.selectedProduct = selectedProduct;
+      this.detailProductIsActive = isActive;
     }
   }
-
-//
 }
 </script>
